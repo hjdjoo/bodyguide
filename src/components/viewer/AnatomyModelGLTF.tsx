@@ -290,6 +290,10 @@ function StructureMesh({ structure }: StructureMeshProps) {
   const { geometry, worldMatrix, metadata } = structure;
   const [hovered, setHovered] = useState(false);
   const animatedOpacity = useRef(1);
+  // Reusable Color instance to avoid per-frame heap allocations inside useFrame.
+  // Allocating `new THREE.Color()` on every frame × every structure creates
+  // significant GC pressure, especially on mobile JS engines.
+  const tempColor = useRef(new THREE.Color());
 
   // Deferred selection pattern refs
   const pendingSelectionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -364,7 +368,8 @@ function StructureMesh({ structure }: StructureMeshProps) {
     } else if (isHighlighted && !shouldPeel) {
       targetColor = colors.highlight;
     }
-    material.color.lerp(new THREE.Color(targetColor), 0.1);
+    tempColor.current.set(targetColor);
+    material.color.lerp(tempColor.current, 0.1);
 
     animatedOpacity.current += (targetOpacity - animatedOpacity.current) * 0.08;
     material.opacity = animatedOpacity.current;

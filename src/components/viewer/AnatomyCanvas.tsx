@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
 import { useAnatomyStore } from '@/store';
+import { useIsMobile } from '@/hooks';
 import { AnatomyModelGLTF } from './AnatomyModelGLTF';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CanvasErrorBoundary } from '../ui/CanvasErrorBoundary';
@@ -13,10 +14,13 @@ import { CanvasErrorBoundary } from '../ui/CanvasErrorBoundary';
  */
 export function AnatomyCanvas() {
   const setZoomLevel = useAnatomyStore((state) => state.setZoomLevel);
+  const isMobile = useIsMobile();
 
   return (
     <CanvasErrorBoundary>
       <Canvas
+        // cap pixel rate on mobile for performance
+        dpr={isMobile ? 1 : [1, 2]}
         camera={{
           position: [0, 0, 2.5],
           fov: 50,
